@@ -48,6 +48,9 @@ $client_mac = get_client_mac();
 // Разрешение на запись в БД новой отметки. По-умолчанию - запрещено.
 $enable = false;
 
+// Имеет ли текущее ТС временную блокировку (запрет отметок и пр.), установленную администратором ресурса.
+$blocked = false;
+
 // Статус выполнения скрипта, который будет направлен клиенту после его выполнения. По-умолчанию - unknown;
 $status = "unknown";
 
@@ -60,22 +63,50 @@ require_once 'dbConnect.php';
 // Утилиты для работы со временем.
 require_once 'dateTimeUtils.php';
 
+// Устанавливается требуемая кодировка символов для работы с БД.
+$sql = "SET NAMES utf8;";
+mysqli_query($con,$sql);
+
 /*********************************************************************************************/
 /* Ищем в БД общую информацию о транспортном средстве. Возможно, оно временно заблокировано
    администратором ресурса и не имеет право отмечаться.
 /*********************************************************************************************/
 // ToDo: сделать поиск это ТС в таблице VEHICLES на наличие активного флага DISABLE = 1.
+// Создаем запрос: ТС с госномером vehicle_id и статусом disabled.
+$sql = "SELECT * FROM $DATABASE_NAME.$VEHICLES_TABLE WHERE vehicle='$vehicle_id' AND blocked='1';";
 
+// Выполняем скрипт.
+$query_result = mysqli_query($con,$sql);
 
+// Взятие выборки было с ошибкой! Останавливаем скрипт.
+if ($query_result == false) echo_error_and_die($con,'Unable get sql query result: {is vehicle blocked?}!');
+
+// Если в запрошенной выборке есть результат...
+if(mysqli_num_rows($query_result)){
+
+    /* Получаем курсор на данные о запрошенном ТС. Значит это ТС заблокировано. Должна быть одна строка с несколькими.
+     * колнками. Если количество строк нулевое, значит что-то не так с БД - надо разбираться!
+     */
+    $rows = mysqli_fetch_array($query_result);
+    if (count($rows) == 0) echo_error_and_die($con,'Unexpected problem #1 with database metadata! Please, contact with developer.');
+    // Проверка валидности функционирования БД. Значение априори должно быть 1, так как в проичном случае эта выборка не
+    // должна была состояться.
+    $blocked = (boolean)$rows['blocked'];
+    if (!$blocked) echo_error_and_die($con,'Unexpected problem #2 with database metadata! Please, contact with developer.');
+
+    // Все проверки выполнены. Данный госномер временно ЗАБЛОКИРОВАН администратором ресурса.
+
+    // Усанавливаем время таймаута.
+    $delay_m = MARK_BLOCKED_VEHICLE_TIMEOUT;
+
+} else { // Указанный госномер НЕ отмечен как заблокированный.
+    $blocked = false;
+}
 
 
 /*********************************************************************************************/
 /* Ищем в БД отмечалось ли это транспортное средство сегодня и когда была последняя отметка. */
 /*********************************************************************************************/
-
-// Устанавливается требуемая кодировка символов.
-$sql = "SET NAMES utf8;";
-mysqli_query($con,$sql);
 
 // Получаем текущую локализованную дату и время.
 $now = getLocalizedNow();
@@ -87,7 +118,7 @@ $sql = "SELECT MAX(time) FROM $DATABASE_NAME.$MARKS_TABLE WHERE DATE(time)=DATE(
 $query_result = mysqli_query($con,$sql);
 
 // Взятие выборки было с ошибкой! Останавливаем скрипт.
-if ($query_result == false) echo_error_and_die($con,'Unable get sql query result: max time vehicle mark!');
+if ($query_result == false) echo_error_and_die($con,'Unable get sql query result: {max time vehicle mark}!');
 
 // Если в запрошенной выборке есть результат...
 if(mysqli_num_rows($query_result)){
@@ -117,9 +148,9 @@ if(mysqli_num_rows($query_result)){
 
 /*********************************************************************************************/
 /* По результатам предыдущего запроса мы имеем флаг $enable, значение true которого разрешает
-/* сделать запись отметки в БД.
+/* сделать запись отметки в БД. Также проверяем флаг на разрешение отметок для этого ТС.
 /*********************************************************************************************/
-if ($enable){
+if ($enable && !$blocked){
     /* Делаем отметку в БД. */
     // Создаем запрос
     $sql = "INSERT INTO $DATABASE_NAME.$MARKS_TABLE (vehicle_id,mac, request_id)
@@ -128,17 +159,28 @@ if ($enable){
                 '$request_id');";
 
     // Выполняем скрипт.
-    if (!mysqli_query($con,$sql)) echo_error_and_die($con,'Unable execute sql query: do vehicle current mark!');
+    if (!mysqli_query($con,$sql)) echo_error_and_die($con,'Unable execute sql query: {do vehicle current mark}!');
 
     // Отметка выполнена удачно.
     $status  = "success";
 
     // Следующую попытку можно повторить через максимальный промежуток времени.
     $delay_m = MARK_ENABLE_TIMEOUT;
+
+    /* Добавляем текущий госномер в перечень госномеров. Если такой номер уже есть в списке - инкрементируем его
+     * "популярность" (popularity).
+     */
+    // Создаем запрос: записать текущее ТС с таблицу vehicles.
+    $sql = "INSERT INTO $DATABASE_NAME.$VEHICLES_TABLE (vehicle) VALUES ('$vehicle_id') ON DUPLICATE KEY UPDATE popularity=popularity+1;";
+
+    // Выполняем скрипт.
+    if (!mysqli_query($con,$sql)) echo_error_and_die($con,'Unable do sql query result: {update popularity}!');
+
 } else {
 
     // Возможность отметки отклонена и отложена на некоторое время.
-    $status  = "postpone";
+    $status  =  $blocked?"blocked":"postpone";
+
     // Следующую попытку следует повторить через ранее вычесленный промежуток времени. На всякий случай проверяем на
     // отрицательное и нулевое значение.
     if ($delay_m <= 0) $delay_m = 1;
@@ -156,7 +198,7 @@ $sql = "SELECT time FROM $DATABASE_NAME.$MARKS_TABLE WHERE DATE(time)=DATE('$now
 $query_result = mysqli_query($con,$sql);
 
 // Взятие выборки было с ошибкой! Останавливаем скрипт.
-if ($query_result == false) echo_error_and_die($con,'Unable get sql query result: all vehicle marks!');
+if ($query_result == false) echo_error_and_die($con,'Unable get sql query result: {all vehicle marks}!');
 
 // Если в запрошенной выборке есть результат...
 if(mysqli_num_rows($query_result)) {
