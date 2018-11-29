@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpProjectServersManager">
+    <servers>
+      <server host="192.168.1.231" id="6d0f2802-b350-4656-a7f2-ad9231ce0812" name="sav_server" port="8088" use_path_mappings="true">
+        <path_mappings>
+          <mapping local-root="$PROJECT_DIR$" remote-root="192.168.1.231" />
+        </path_mappings>
+      </server>
+    </servers>
+  </component>
+  <component name="PhpProjectSharedConfiguration" php_language_level="5.5.0" />
+</project>
