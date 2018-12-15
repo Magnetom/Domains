@@ -898,90 +898,119 @@
       <DefaultForCharset>0</DefaultForCharset>
     </collation>
     <table id="225" parent="5" name="marks"/>
-    <table id="226" parent="5" name="vehicles"/>
-    <column id="227" parent="225" name="id">
+    <table id="226" parent="5" name="variables"/>
+    <table id="227" parent="5" name="vehicles"/>
+    <column id="228" parent="225" name="id">
       <Position>1</Position>
       <DataType>int(11) unsigned|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>1</SequenceIdentity>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="228" parent="225" name="vehicle_id">
+    <column id="229" parent="225" name="vehicle_id">
       <Position>2</Position>
       <DataType>varchar(14)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="229" parent="225" name="time">
+    <column id="230" parent="225" name="time">
       <Position>3</Position>
       <DataType>timestamp|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="230" parent="225" name="mac">
+    <column id="231" parent="225" name="mac">
       <Position>4</Position>
       <DataType>varchar(18)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="231" parent="225" name="request_id">
+    <column id="232" parent="225" name="request_id">
       <Position>5</Position>
       <DataType>varchar(20)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="232" parent="225" name="request_id">
+    <index id="233" parent="225" name="request_id">
       <ColNames>request_id</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <key id="233" parent="225" name="PRIMARY">
+    <key id="234" parent="225" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="234" parent="225" name="request_id">
+    <key id="235" parent="225" name="request_id">
       <ColNames>request_id</ColNames>
       <UnderlyingIndexName>request_id</UnderlyingIndexName>
     </key>
-    <column id="235" parent="226" name="id">
+    <column id="236" parent="226" name="id">
+      <Position>1</Position>
+      <DataType>int(10) unsigned|0s</DataType>
+      <NotNull>1</NotNull>
+      <DefaultExpression>&apos;0&apos;</DefaultExpression>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="237" parent="226" name="name">
+      <Position>2</Position>
+      <DataType>varchar(50)|0s</DataType>
+      <DefaultExpression>&apos;0&apos;</DefaultExpression>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="238" parent="226" name="value">
+      <Position>3</Position>
+      <DataType>varchar(50)|0s</DataType>
+      <DefaultExpression>&apos;0&apos;</DefaultExpression>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <index id="239" parent="226" name="id">
+      <ColNames>id</ColNames>
+      <Unique>1</Unique>
+      <Type>btree</Type>
+    </index>
+    <key id="240" parent="226" name="id">
+      <ColNames>id</ColNames>
+      <UnderlyingIndexName>id</UnderlyingIndexName>
+    </key>
+    <column id="241" parent="227" name="id">
       <Position>1</Position>
       <DataType>int(11) unsigned|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>1</SequenceIdentity>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="236" parent="226" name="vehicle">
+    <column id="242" parent="227" name="vehicle">
       <Position>2</Position>
       <DataType>varchar(18)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="237" parent="226" name="popularity">
+    <column id="243" parent="227" name="popularity">
       <Position>3</Position>
       <DataType>int(11) unsigned|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>&apos;0&apos;</DefaultExpression>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="238" parent="226" name="blocked">
+    <column id="244" parent="227" name="blocked">
       <Position>4</Position>
       <DataType>bit(1)|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>b&apos;0&apos;</DefaultExpression>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="239" parent="226" name="vehicle_id">
+    <index id="245" parent="227" name="vehicle_id">
       <ColNames>vehicle</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <key id="240" parent="226" name="PRIMARY">
+    <key id="246" parent="227" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="241" parent="226" name="vehicle_id">
+    <key id="247" parent="227" name="vehicle_id">
       <ColNames>vehicle</ColNames>
       <UnderlyingIndexName>vehicle_id</UnderlyingIndexName>
     </key>
