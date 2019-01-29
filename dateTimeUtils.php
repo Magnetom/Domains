@@ -1,5 +1,6 @@
-<?php 
+<?php
 
+define('LOCAL_TIMEZONE','Etc/GMT-7'); // Novosibirsk/Novokuznetsk (+07:00 UTC)
 
 function getTimeDiff ($startDateTime, $stopDateTime){
     
@@ -20,21 +21,21 @@ function getTimeDiff ($startDateTime, $stopDateTime){
 function getLocalizedNow(){
     date_default_timezone_set('UTC');
     $_tempDate = new DateTime(date('Y-m-d H:i:s'), new DateTimeZone('UTC'));
-    $_tempDate->setTimezone(new DateTimeZone('ASIA/Novosibirsk'));
+    $_tempDate->setTimezone(new DateTimeZone(LOCAL_TIMEZONE));
     return $_tempDate->format('Y-m-d H:i:s');
 }
 
 function getLocalizedDate(){
     date_default_timezone_set('UTC');
     $_tempDate = new DateTime(date('Y-m-d H:i:s'), new DateTimeZone('UTC'));
-    $_tempDate->setTimezone(new DateTimeZone('ASIA/Novosibirsk'));
+    $_tempDate->setTimezone(new DateTimeZone(LOCAL_TIMEZONE));
     return $_tempDate->format('Y-m-d');
 }
 
 function getLocalizedTime(){
     date_default_timezone_set('UTC');
     $_tempDate = new DateTime(date('Y-m-d H:i:s'), new DateTimeZone('UTC'));
-    $_tempDate->setTimezone(new DateTimeZone('ASIA/Novosibirsk'));
+    $_tempDate->setTimezone(new DateTimeZone(LOCAL_TIMEZONE));
     return $_tempDate->format('H:i:s');
 }
 
@@ -45,10 +46,10 @@ function getFormattedDate($multy_format_date_string){
     return $tmpDate->format('Y-m-d');
 }
 
-function getFormattedTime($multy_format_date_string){
-    if ( !isset($multy_format_date_string) || (strlen($multy_format_date_string)==0) ) return getLocalizedTime();
+function getFormattedTime($multi_format_date_string){
+    if ( !isset($multi_format_date_string) || (strlen($multi_format_date_string)==0) ) return getLocalizedTime();
     
-    $tmpDate = new DateTime($multy_format_date_string, new DateTimeZone('UTC'));
+    $tmpDate = new DateTime($multi_format_date_string, new DateTimeZone('UTC'));
     return $tmpDate->format('H:i:s');
 }
 ?>

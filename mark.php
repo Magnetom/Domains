@@ -222,11 +222,13 @@ if(mysqli_num_rows($query_result)){
 /*********************************************************************************************/
 if ($enable && !$blocked && !$global_blocked){
     /* Делаем отметку в БД. */
+    $now = getLocalizedNow();
     // Создаем запрос
-    $sql = "INSERT INTO $DATABASE_NAME.$MARKS_TABLE (vehicle,mac,request)
+    $sql = "INSERT INTO $DATABASE_NAME.$MARKS_TABLE (vehicle,mac,request,time)
         VALUES ('$vehicle',
                 '$client_mac',
-                '$request');";
+                '$request',
+                '$now');";
 
     // Выполняем скрипт.
     if (!mysqli_query($con,$sql)) echo_error_and_die($con,'Unable execute sql query: {do vehicle current mark}!');
