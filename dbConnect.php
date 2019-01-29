@@ -2,9 +2,9 @@
 
 //Defining Constants
 define('HOST','localhost');
-define('DB','sav');
-define('USER','user');
-define('PASS','mysqluser');
+define('DB','aura');
+define('USER','admin');
+define('PASS','mysqladmin');
 
 // имя текуще БД.
 $DATABASE_NAME = DB;

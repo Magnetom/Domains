@@ -26,10 +26,10 @@ require_once('randomUtils.php');
 // особенностью работы некоторых библиотек формирования запросов. Например, библиотека Volley в Android в некоторых
 // обстоятельствах дуюлирует единажды сформированный запрос, в результате php-скрипт выполняется для одних и ех же данных и
 // в БД появляются дублирющиеся записи. Имея колонку request_id в БД и индексом UNIQUE, возможно исключить дублирующие записи.
-$request_id = $response['request_id'];
+$request = $response['request'];
 
 // Проверяем идентификатор
-if (!isset($response['request_id']) || $request_id == '') echo_empty_and_die();
+if (!isset($response['request']) || $request == '') echo_empty_and_die();
 
 // Получаем отпечаток клиента для проверки безопасности.
 $token = $response['token'];
@@ -38,10 +38,10 @@ $token = $response['token'];
 if (!isset($response['token']) || $token != $CLIENT_REQUEST_TOKEN) echo_empty_and_die();
 
 // Получаем из http запроса гос. номер траспортного средства.
-$vehicle_id = $response['vehicle_id'];
+$vehicle = $response['vehicle'];
 
 // Если в запросе не указан идентификационный номер, завершаем скрипт.
-if (!isset($vehicle_id)) echo_empty_and_die();
+if (!isset($vehicle)) echo_empty_and_die();
 
 // Так как по техническому заданию клиенты и сервер находятся в одной подсети, то становится возможным определение
 // MAC-адреса устройства клиента запроса.
@@ -133,7 +133,7 @@ if(mysqli_num_rows($query_result)){
    администратором ресурса и не имеет право отмечаться.
 /*********************************************************************************************/
 // Создаем запрос: ТС с госномером vehicle_id и статусом disabled.
-$sql = "SELECT * FROM $DATABASE_NAME.$VEHICLES_TABLE WHERE vehicle='$vehicle_id' AND blocked='1';";
+$sql = "SELECT * FROM $DATABASE_NAME.$VEHICLES_TABLE WHERE vehicle='$vehicle' AND blocked='1';";
 
 // Выполняем скрипт.
 $query_result = mysqli_query($con,$sql);
@@ -175,7 +175,7 @@ if(mysqli_num_rows($query_result)){
 $now = getLocalizedNow();
 
 // Создаем запрос: последнее время отметки транспортного средства за сегодня.
-$sql = "SELECT MAX(time) FROM $DATABASE_NAME.$MARKS_TABLE WHERE DATE(time)=DATE('$now') AND vehicle_id='$vehicle_id';";
+$sql = "SELECT MAX(time) FROM $DATABASE_NAME.$MARKS_TABLE WHERE DATE(time)=DATE('$now') AND vehicle='$vehicle';";
 
 // Выполняем скрипт.
 $query_result = mysqli_query($con,$sql);
@@ -223,10 +223,10 @@ if(mysqli_num_rows($query_result)){
 if ($enable && !$blocked && !$global_blocked){
     /* Делаем отметку в БД. */
     // Создаем запрос
-    $sql = "INSERT INTO $DATABASE_NAME.$MARKS_TABLE (vehicle_id,mac, request_id)
-        VALUES ('$vehicle_id',
+    $sql = "INSERT INTO $DATABASE_NAME.$MARKS_TABLE (vehicle,mac,request)
+        VALUES ('$vehicle',
                 '$client_mac',
-                '$request_id');";
+                '$request');";
 
     // Выполняем скрипт.
     if (!mysqli_query($con,$sql)) echo_error_and_die($con,'Unable execute sql query: {do vehicle current mark}!');
@@ -241,7 +241,7 @@ if ($enable && !$blocked && !$global_blocked){
      * "популярность" (popularity).
      */
     // Создаем запрос: записать текущее ТС с таблицу vehicles.
-    $sql = "INSERT INTO $DATABASE_NAME.$VEHICLES_TABLE (vehicle) VALUES ('$vehicle_id') ON DUPLICATE KEY UPDATE popularity=popularity+1;";
+    $sql = "INSERT INTO $DATABASE_NAME.$VEHICLES_TABLE (vehicle) VALUES ('$vehicle') ON DUPLICATE KEY UPDATE popularity=popularity+1;";
 
     // Выполняем скрипт.
     if (!mysqli_query($con,$sql)) echo_error_and_die($con,'Unable do sql query result: {update popularity}!');
@@ -271,7 +271,7 @@ if ($enable && !$blocked && !$global_blocked){
 /*********************************************************************************************/
 $today_marks = array();
 // Создаем запрос: все отметки транспортного средства за сегодня.
-$sql = "SELECT time FROM $DATABASE_NAME.$MARKS_TABLE WHERE DATE(time)=DATE('$now') AND vehicle_id='$vehicle_id';";
+$sql = "SELECT time FROM $DATABASE_NAME.$MARKS_TABLE WHERE DATE(time)=DATE('$now') AND vehicle='$vehicle';";
 
 // Выполняем скрипт.
 $query_result = mysqli_query($con,$sql);
